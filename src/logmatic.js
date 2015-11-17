@@ -5,13 +5,17 @@ var net = require('net');
 
 function Logmatic(config, f) {
   this.retryCount = 0;
+  this.isConnected = false;
   this.config = _.defaultsDeep(config, {
     tcp: {
       host: 'api.logmatic.io',
       port: 10514
     },
+    retryTimeout: 5000,
     defaultMessage: {}
   });
+
+  this.messageBuffer = [];
 
   if (!_.isString(this.config.token)) {
     throw new Error('The token wasn\'t specified');
@@ -30,7 +34,13 @@ _.extend(Logmatic.prototype, {
     this.socket = net.createConnection(this.config.tcp, f);
 
     this.socket.on('connect', function() {
+      this.isConnected = true;
       this.retryCount = 0;
+
+      while (this.messageBuffer.length) {
+        this.sendMessage(this.messageBuffer.shift());
+      }
+
       console.log('Logmatic - connected.');
     }.bind(this));
 
@@ -41,12 +51,16 @@ _.extend(Logmatic.prototype, {
     this.socket.on('error', console.error.bind(console));
 
     this.socket.on('close', function() {
+      this.isConnected = false;
       this.retryCount++;
-      this.connect();
 
       if(this.retryCount > 1) {
+        setTimeout(function() {
+          this.connect();
+        }.bind(this), this.config.retryTimeout);
         console.error('Logmatic - failling to reconnect', this.retryCount);
       } else {
+        this.connect();
         console.log('Logmatic - connection closed.');
       }
     }.bind(this));
@@ -56,9 +70,8 @@ _.extend(Logmatic.prototype, {
    * Send log message
    *
    * @param  {object|any} message
-   * @param  {function} f
    */
-  log: function(message, f) {
+  log: function(message) {
     if (!_.isObject(message)) {
       message = {
         message: message
@@ -68,15 +81,18 @@ _.extend(Logmatic.prototype, {
     try {
       message = JSON.stringify(_.defaultsDeep({}, message, this.config.defaultMessage));
     } catch (e) {
-      if (f instanceof Function) f(e);
       return console.error('Logmatic - error while parsing log message. Not sending', e);
     }
 
-    this.socket.write(this.config.token + ' ' + message + '\n', null, function() {
-      if (f instanceof Function) {
-        f.apply(null, [null].concat(arguments));
-      }
-    });
+    if (this.isConnected) {
+      this.sendMessage(message);
+    } else {
+      this.messageBuffer.push(message);
+    }
+  },
+
+  sendMessage: function(message) {
+    this.socket.write(this.config.token + ' ' + message + '\n');
   },
 
   end: function() {
