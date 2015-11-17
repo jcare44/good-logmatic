@@ -91,10 +91,17 @@ _.extend(Logmatic.prototype, {
     }
   },
 
+  /**
+   * Send message over TCP to Logmatic
+   * @param  {string} message
+   */
   sendMessage: function(message) {
     this.socket.write(this.config.token + ' ' + message + '\n');
   },
 
+  /**
+   * End TCP connection with Logmatic
+   */
   end: function() {
     this.socket.end();
   }
