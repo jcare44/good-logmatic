@@ -16,20 +16,52 @@ function Logmatic(config, f) {
     throw new Error('The token wasn\'t specified');
   }
 
-  this.socket = net.createConnection(this.config.tcp, f);
+  this.connect(f);
 }
 
 _.extend(Logmatic.prototype, {
+  /**
+   * Connect to the server (called by constructor)
+   *
+   * @param  {function} f
+   */
+  connect: function(f) {
+    this.socket = net.createConnection(this.config.tcp, f);
+
+    this.socket.on('timeout', function() {
+      console.warn('Logmatic - connection timed out.');
+    });
+
+    this.socket.on('error', console.error.bind(console));
+
+    this.socket.on('close', function(hadError) {
+      console.warn('Logmatic - connection closed. With error ? ' + hadError);
+    });
+  },
+
+  /**
+   * Send log message
+   *
+   * @param  {object|any} message
+   * @param  {function} f
+   */
   log: function(message, f) {
     if (!_.isObject(message)) {
       message = {
-        content: message
+        message: message
       };
     }
 
-    message = JSON.stringify(_.defaultsDeep(message, this.config.defaultMessage));
+    try {
+      message = JSON.stringify(_.defaultsDeep(message, this.config.defaultMessage));
+    } catch (e) {
+      console.error('Logmatic - error while parsing log message. Not sending', e);
+      return f(e);
+    }
 
-    this.socket.write(this.config.token + ' ' + message + '\n', null, f);
+    this.socket.write(this.config.token + ' ' + message + '\n', null, function() {
+      f.apply(null, [null].concat(arguments));
+    });
   },
 
   end: function() {
