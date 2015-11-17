@@ -4,6 +4,7 @@ var _ = require('lodash');
 var net = require('net');
 
 function Logmatic(config, f) {
+  this.retryCount = 0;
   this.config = _.defaultsDeep(config, {
     tcp: {
       host: 'api.logmatic.io',
@@ -28,15 +29,27 @@ _.extend(Logmatic.prototype, {
   connect: function(f) {
     this.socket = net.createConnection(this.config.tcp, f);
 
+    this.socket.on('connect', function() {
+      this.retryCount = 0;
+      console.log('Logmatic - connected.');
+    }.bind(this));
+
     this.socket.on('timeout', function() {
       console.warn('Logmatic - connection timed out.');
     });
 
     this.socket.on('error', console.error.bind(console));
 
-    this.socket.on('close', function(hadError) {
-      console.warn('Logmatic - connection closed. With error ? ' + hadError);
-    });
+    this.socket.on('close', function() {
+      this.retryCount++;
+      this.connect();
+
+      if(this.retryCount > 1) {
+        console.error('Logmatic - failling to reconnect', this.retryCount);
+      } else {
+        console.log('Logmatic - connection closed.');
+      }
+    }.bind(this));
   },
 
   /**
