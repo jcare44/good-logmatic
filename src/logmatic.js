@@ -53,14 +53,16 @@ _.extend(Logmatic.prototype, {
     }
 
     try {
-      message = JSON.stringify(_.defaultsDeep(message, this.config.defaultMessage));
+      message = JSON.stringify(_.defaultsDeep({}, message, this.config.defaultMessage));
     } catch (e) {
-      console.error('Logmatic - error while parsing log message. Not sending', e);
-      return f(e);
+      if (f instanceof Function) f(e);
+      return console.error('Logmatic - error while parsing log message. Not sending', e);
     }
 
     this.socket.write(this.config.token + ' ' + message + '\n', null, function() {
-      f.apply(null, [null].concat(arguments));
+      if (f instanceof Function) {
+        f.apply(null, [null].concat(arguments));
+      }
     });
   },
 
