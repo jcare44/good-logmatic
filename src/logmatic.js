@@ -12,8 +12,14 @@ function Logmatic(config, f) {
       port: 10514
     },
     retryTimeout: 5000,
-    defaultMessage: {}
+    defaultMessage: {},
+    logger: {
+      debug: console.log.bind(console),
+      warn: console.warn.bind(console),
+      error: console.error.bind(console)
+    }
   });
+  this.logger = this.config.logger;
 
   this.messageBuffer = [];
 
@@ -41,14 +47,14 @@ _.extend(Logmatic.prototype, {
         this.sendMessage(this.messageBuffer.shift());
       }
 
-      console.log('Logmatic - connected.');
+      this.logger.debug('Logmatic - connected.');
     }.bind(this));
 
     this.socket.on('timeout', function() {
-      console.warn('Logmatic - connection timed out.');
+      this.logger.warn('Logmatic - connection timed out.');
     });
 
-    this.socket.on('error', console.error.bind(console));
+    this.socket.on('error', this.logger.error.bind(this.logger));
 
     this.socket.on('close', function() {
       this.isConnected = false;
@@ -58,10 +64,10 @@ _.extend(Logmatic.prototype, {
         setTimeout(function() {
           this.connect();
         }.bind(this), this.config.retryTimeout);
-        console.error('Logmatic - failling to reconnect', this.retryCount);
+        this.logger.error('Logmatic - failling to reconnect', this.retryCount);
       } else {
         this.connect();
-        console.log('Logmatic - connection closed.');
+        this.logger.debug('Logmatic - connection closed.');
       }
     }.bind(this));
   },
@@ -81,7 +87,7 @@ _.extend(Logmatic.prototype, {
     try {
       message = JSON.stringify(_.defaultsDeep({}, message, this.config.defaultMessage));
     } catch (e) {
-      return console.error('Logmatic - error while parsing log message. Not sending', e);
+      return this.logger.error('Logmatic - error while parsing log message. Not sending', e);
     }
 
     if (this.isConnected) {
