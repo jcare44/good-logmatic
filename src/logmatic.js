@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('lodash');
-var net = require('net');
+var tls = require('tls');
 
 function Logmatic(config, f) {
   this.retryCount = 0;
@@ -9,12 +9,13 @@ function Logmatic(config, f) {
   this.config = _.defaultsDeep(config, {
     tcp: {
       host: 'api.logmatic.io',
-      port: 10514
+      port: 10515
     },
     retryTimeout: 5000,
     defaultMessage: {},
     logger: {
       debug: _.noop,
+      info: console.log.bind(console),
       warn: console.warn.bind(console),
       error: console.error.bind(console)
     }
@@ -37,17 +38,20 @@ _.extend(Logmatic.prototype, {
    * @param  {function} f
    */
   connect: function(f) {
-    this.socket = net.createConnection(this.config.tcp, f);
+    this.socket = tls.connect(this.config.tcp, f);
 
-    this.socket.on('connect', function() {
+    this.socket.on('secureConnect', function() {
       this.isConnected = true;
+      if (this.retryCount > 1) {
+        this.logger.info('Logmatic - reconnected.');
+      } else {
+        this.logger.debug('Logmatic - connected.');
+      }
       this.retryCount = 0;
 
       while (this.messageBuffer.length) {
         this.sendMessage(this.messageBuffer.shift());
       }
-
-      this.logger.debug('Logmatic - connected.');
     }.bind(this));
 
     this.socket.on('timeout', function() {
