@@ -14,7 +14,7 @@ function Logmatic(config, f) {
     retryTimeout: 5000,
     defaultMessage: {},
     logger: {
-      debug: console.log.bind(console),
+      debug: _.noop,
       warn: console.warn.bind(console),
       error: console.error.bind(console)
     }
