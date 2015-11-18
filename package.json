@@ -1,11 +1,11 @@
 {
   "name": "good-logmatic",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Good reporter for Logmatic",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "changelog": "github-changes --o jcare44 --r good-logmatic --token $CHANGELOG_GITHUB_TOKEN -f CHANGELOG.md"
+    "changelog": "github-changes --o jcare44 --r good-logmatic --token $CHANGELOG_GITHUB_API_TOKEN -f CHANGELOG.md"
   },
   "repository": {
     "type": "git",
