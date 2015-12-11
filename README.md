@@ -10,7 +10,7 @@ npm i -S good-logmatic
 
 You need to pass down two config objects to good-logmatic for him to work.
 - The first object represent [good-squeeze](https://github.com/hapijs/good-squeeze) events
-- The second is defined with the following defaults
+- The second represent the [node-logmatic](https://github.com/jcare44/node-logmatic) configuration object
 
 ```javascript
 {
@@ -20,7 +20,7 @@ You need to pass down two config objects to good-logmatic for him to work.
     port: 10515
   },
   retryTimeout: 5000, // when failling to reconnect, this timeout if used for each retry
-  defaultMessage: {}, // add a default value to your log messages (like appname or hostname)
+  defaultProps: {}, // add a default value to your log messages (like appname or hostname)
   logger: { //Define the logging functions used
     debug: _.noop,
     info: console.log.bind(console),
@@ -74,7 +74,7 @@ hapi.register({
         ops : '*',
       }, { // your config
         token : 'YOUR LOG TOKEN',
-        defaultMessage: {
+        defaultProps: {
           appname: require('./package.json').name,
           hostname: 'prod'
         },

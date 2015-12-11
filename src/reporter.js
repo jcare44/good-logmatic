@@ -4,7 +4,7 @@
 var _ = require('lodash');
 var utils = require('good/lib/utils');
 var Squeeze = require('good-squeeze').Squeeze;
-var Logmatic = require('./logmatic');
+var Logmatic = require('node-logmatic');
 
 /**
  * Constructor

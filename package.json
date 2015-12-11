@@ -1,6 +1,6 @@
 {
   "name": "good-logmatic",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "Good reporter for Logmatic",
   "main": "index.js",
   "scripts": {
@@ -27,7 +27,8 @@
   "homepage": "https://github.com/jcare44/good-logmatic",
   "dependencies": {
     "good-squeeze": "^2.1.0",
-    "lodash": "^3.10.0"
+    "lodash": "^3.10.0",
+    "node-logmatic": "^1.0.0"
   },
   "peerDependencies": {
     "good": "^6.0.0"
