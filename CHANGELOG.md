@@ -1,5 +1,9 @@
 ## Change Log
 
+### v1.0.0 (2015/12/11 15:33 +00:00)
+- [681938b](https://github.com/jcare44/good-logmatic/commit/681938b19c20927b652e13f28ac097ce0a33cb32) Externalized logmatic client (@jcare44)
+- [1dc7986](https://github.com/jcare44/good-logmatic/commit/1dc798603adc0c0dc08133814f076d3919e7bfb5) Add changelog (@jcare44)
+
 ### v0.3.0 (2015/11/18 13:35 +00:00)
 - [e1edb0d](https://github.com/jcare44/good-logmatic/commit/e1edb0db6328ecdd4405d0ac753713ab642524af) Release 0.3.0 (@jcare44)
 - [65746ff](https://github.com/jcare44/good-logmatic/commit/65746ff2d3e7efd8dc514fb76f5542ab25c090c1) Now use TCP over TLS (@jcare44)
